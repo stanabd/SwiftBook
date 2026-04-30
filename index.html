@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1"/>
+<title>SwiftBook — Hotels, Flights & Cars</title>
+<meta name="description" content="Compare hotels, flights and car rentals with real-time pricing. SwiftBook finds the best deals across hundreds of providers instantly."/>
+<meta property="og:title" content="SwiftBook — Hotels, Flights & Cars"/>
+<meta property="og:description" content="Find your perfect trip with real-time pricing from hundreds of providers."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={
+  darkMode:['selector','[data-theme="dark"]'],
+  theme:{extend:{
+    colors:{
+      primary:{DEFAULT:'#01696f',hover:'#0c4e54',light:'#cedcd8',dark:'#4f98a3'},
+      surface:{DEFAULT:'#f9f8f5','2':'#fbfbf9',offset:'#f3f0ec'},
+      ink:{DEFAULT:'#28251d',muted:'#7a7974',faint:'#bab9b4'},
+      dsurface:{DEFAULT:'#1c1b19','2':'#201f1d',offset:'#22211f'},
+      dink:{DEFAULT:'#cdccca',muted:'#797876',faint:'#5a5957'},
+    },
+    fontFamily:{
+      display:['"Instrument Serif"','Georgia','serif'],
+      body:['"Plus Jakarta Sans"','system-ui','sans-serif'],
+    }
+  }}
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body,"Plus Jakarta Sans",system-ui,sans-serif);background:#f7f6f2;color:#28251d;min-height:100dvh;transition:background .2s,color .2s}
+[data-theme="dark"] body{background:#171614;color:#cdccca}
+:root{--transition:180ms cubic-bezier(.16,1,.3,1)}
+a,button,[role="button"],input,select{transition:color var(--transition),background var(--transition),border-color var(--transition),box-shadow var(--transition)}
+button{cursor:pointer;background:none;border:none}
+img{display:block;max-width:100%;height:auto}
+::selection{background:rgba(1,105,111,.2)}
+:focus-visible{outline:2px solid #01696f;outline-offset:3px;border-radius:4px}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,#e8e6e1 25%,#f0ede8 50%,#e8e6e1 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:8px}
+[data-theme="dark"] .skeleton{background:linear-gradient(90deg,#2d2c2a 25%,#3a3936 50%,#2d2c2a 75%);background-size:200% 100%}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s cubic-bezier(.16,1,.3,1) both}
+.tab-btn{position:relative;padding:.5rem 1.25rem;font-size:.9rem;font-weight:600;border-radius:999px;transition:all var(--transition);color:#7a7974}
+.tab-btn.active{background:#01696f;color:#fff}
+[data-theme="dark"] .tab-btn{color:#797876}
+[data-theme="dark"] .tab-btn.active{background:#4f98a3;color:#fff}
+.tab-btn:not(.active):hover{background:#f3f0ec;color:#28251d}
+[data-theme="dark"] .tab-btn:not(.active):hover{background:#2d2c2a;color:#cdccca}
+.search-input{width:100%;padding:.65rem 1rem;border:1.5px solid #d4d1ca;border-radius:10px;font-size:.9rem;background:#fff;color:#28251d;outline:none;font-family:inherit}
+.search-input:focus{border-color:#01696f;box-shadow:0 0 0 3px rgba(1,105,111,.12)}
+[data-theme="dark"] .search-input{background:#1c1b19;border-color:#393836;color:#cdccca}
+[data-theme="dark"] .search-input:focus{border-color:#4f98a3;box-shadow:0 0 0 3px rgba(79,152,163,.15)}
+.btn-primary{padding:.7rem 1.75rem;background:#01696f;color:#fff;border-radius:10px;font-weight:700;font-size:.9rem;font-family:inherit;letter-spacing:.01em}
+.btn-primary:hover{background:#0c4e54;transform:translateY(-1px);box-shadow:0 4px 12px rgba(1,105,111,.25)}
+.btn-primary:active{transform:translateY(0)}
+[data-theme="dark"] .btn-primary{background:#4f98a3}
+[data-theme="dark"] .btn-primary:hover{background:#227f8b}
+.btn-book{padding:.5rem 1.25rem;background:#01696f;color:#fff;border-radius:8px;font-weight:700;font-size:.82rem;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem}
+.btn-book:hover{background:#0c4e54;transform:translateY(-1px);box-shadow:0 4px 12px rgba(1,105,111,.25)}
+[data-theme="dark"] .btn-book{background:#4f98a3}
+[data-theme="dark"] .btn-book:hover{background:#227f8b}
+.card{background:#fff;border-radius:14px;border:1px solid rgba(0,0,0,.07);box-shadow:0 2px 8px rgba(40,37,29,.06);transition:box-shadow var(--transition),transform var(--transition)}
+.card:hover{box-shadow:0 8px 24px rgba(40,37,29,.1);transform:translateY(-2px)}
+[data-theme="dark"] .card{background:#1c1b19;border-color:rgba(255,255,255,.07);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+[data-theme="dark"] .card:hover{box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.badge{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.badge-green{background:#d4dfcc;color:#1e3f0a}
+.badge-teal{background:#cedcd8;color:#0f3638}
+.badge-gold{background:#e9e0c6;color:#8a5b00}
+.badge-blue{background:#c6d8e4;color:#0b3751}
+[data-theme="dark"] .badge-green{background:#3a4435;color:#6daa45}
+[data-theme="dark"] .badge-teal{background:#313b3b;color:#4f98a3}
+[data-theme="dark"] .badge-gold{background:#4d4332;color:#e8af34}
+[data-theme="dark"] .badge-blue{background:#3a4550;color:#5591c7}
+.price-tag{font-size:1.5rem;font-weight:800;color:#01696f;line-height:1}
+[data-theme="dark"] .price-tag{color:#4f98a3}
+.star{color:#d19900}
+.nav-glass{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(247,246,242,.88);border-bottom:1px solid rgba(0,0,0,.07)}
+[data-theme="dark"] .nav-glass{background:rgba(23,22,20,.9);border-bottom:1px solid rgba(255,255,255,.07)}
+.hero-bg{background:linear-gradient(135deg,#0f3638 0%,#01696f 40%,#0c4e54 70%,#0b3751 100%);position:relative;overflow:hidden}
+.hero-bg::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.flight-line{height:1px;background:linear-gradient(90deg,#d4d1ca,#01696f,#d4d1ca);flex:1;margin:0 .75rem;position:relative}
+.flight-line::after{content:'✈';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:0 .25rem;font-size:.8rem;color:#01696f}
+[data-theme="dark"] .flight-line{background:linear-gradient(90deg,#393836,#4f98a3,#393836)}
+[data-theme="dark"] .flight-line::after{background:#1c1b19;color:#4f98a3}
+.deal-card{background:linear-gradient(135deg,#0f3638,#01696f);color:#fff;border-radius:14px;padding:1.5rem;position:relative;overflow:hidden;transition:transform var(--transition),box-shadow var(--transition)}
+.deal-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(1,105,111,.3)}
+.deal-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(255,255,255,.07);border-radius:50%}
+.deal-card::after{content:'';position:absolute;bottom:-20px;left:-20px;width:70px;height:70px;background:rgba(255,255,255,.05);border-radius:50%}
+.discount-ribbon{position:absolute;top:12px;right:12px;background:#d19900;color:#fff;padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.05em}
+.sort-btn{padding:.35rem .85rem;border-radius:8px;font-size:.8rem;font-weight:600;color:#7a7974;border:1px solid #d4d1ca}
+.sort-btn:hover,.sort-btn.active{background:#01696f;color:#fff;border-color:#01696f}
+[data-theme="dark"] .sort-btn{color:#797876;border-color:#393836}
+[data-theme="dark"] .sort-btn:hover,[data-theme="dark"] .sort-btn.active{background:#4f98a3;border-color:#4f98a3;color:#fff}
+.ad-slot{background:linear-gradient(135deg,#f3f0ec,#e8e6e1);border:1.5px dashed #d4d1ca;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:90px;color:#7a7974;font-size:.75rem;text-align:center;padding:1rem;transition:all var(--transition)}
+[data-theme="dark"] .ad-slot{background:linear-gradient(135deg,#22211f,#2d2c2a);border-color:#393836;color:#797876}
+.ad-slot-active{min-height:90px;padding:0;border:none;background:none}
+.source-live{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .5rem;border-radius:6px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;background:rgba(34,197,94,.12);color:#15803d}
+.source-mock{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .5rem;border-radius:6px;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;background:rgba(234,179,8,.1);color:#a16207}
+[data-theme="dark"] .source-live{background:rgba(34,197,94,.15);color:#4ade80}
+[data-theme="dark"] .source-mock{background:rgba(234,179,8,.12);color:#facc15}
+.trust-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.6);backdrop-filter:blur(8px);font-size:.78rem;font-weight:600;color:#28251d}
+[data-theme="dark"] .trust-badge{border-color:rgba(255,255,255,.08);background:rgba(28,27,25,.6);color:#cdccca}
+.revenue-stat{display:flex;flex-direction:column;align-items:center;padding:1rem;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.07)}
+[data-theme="dark"] .revenue-stat{background:#1c1b19;border-color:rgba(255,255,255,.07)}
+input[type="date"]::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer}
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.4}
+</style>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2301696f'/%3E%3Cpath d='M9 16L15 10L22 16L15 22Z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M15 10L15 22' stroke='white' stroke-width='2'/%3E%3Ccircle cx='15' cy='16' r='1.5' fill='white'/%3E%3C/svg%3E"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2" aria-label="SwiftBook Home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="14" fill="#01696f"/><path d="M8 14 L13 9 L20 14 L13 19 Z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 9 L13 19" stroke="#fff" stroke-width="1.8"/><circle cx="13" cy="14" r="1.5" fill="#fff"/></svg>
+      <span class="font-body text-ink dark:text-dink" style="font-weight:700;font-size:1.15rem">SwiftBook</span>
+    </a>
+    <div class="hidden md:flex items-center gap-1">
+      <a href="#deals" class="px-3 py-1.5 text-sm font-semibold text-ink/70 dark:text-dink/70 hover:text-primary dark:hover:text-primary-dark rounded-lg hover:bg-surface-offset dark:hover:bg-dsurface-2 transition-all">Deals</a>
+      <a href="#how" class="px-3 py-1.5 text-sm font-semibold text-ink/70 dark:text-dink/70 hover:text-primary dark:hover:text-primary-dark rounded-lg hover:bg-surface-offset dark:hover:bg-dsurface-2 transition-all">How it works</a>
+      <a href="#admin" class="px-3 py-1.5 text-sm font-semibold text-ink/70 dark:text-dink/70 hover:text-primary dark:hover:text-primary-dark rounded-lg hover:bg-surface-offset dark:hover:bg-dsurface-2 transition-all">Revenue</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <button data-theme-toggle aria-label="Toggle dark mode" class="p-2 rounded-lg text-ink/60 dark:text-dink/60 hover:bg-surface-offset dark:hover:bg-dsurface-2 transition-all">
+        <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn-primary hidden md:block">Sign In</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-bg pt-24 pb-0 px-4">
+  <div class="max-w-3xl mx-auto text-center pt-8 pb-10 relative z-10">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold mb-5 backdrop-blur-sm">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+      <span id="api-status-text">Connecting to live pricing...</span>
+    </div>
+    <h1 class="font-display text-4xl md:text-6xl text-white mb-4 leading-tight">Find Your<br><em>Perfect Trip</em></h1>
+    <p class="text-white/70 text-base md:text-lg font-body max-w-md mx-auto">Compare hotels, flights &amp; car rentals with real-time pricing from hundreds of providers.</p>
+  </div>
+
+  <!-- SEARCH WIDGET -->
+  <div class="max-w-4xl mx-auto relative z-10">
+    <div class="bg-white dark:bg-dsurface rounded-t-2xl shadow-2xl p-4 md:p-6">
+      <div class="flex gap-1 mb-5 bg-surface-offset dark:bg-dsurface-offset p-1 rounded-xl w-fit">
+        <button class="tab-btn active" data-tab="flights"><span class="flex items-center gap-1.5"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>Flights</span></button>
+        <button class="tab-btn" data-tab="hotels"><span class="flex items-center gap-1.5"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 22V7l9-5 9 5v15"/><path d="M9 22V12h6v10"/></svg>Hotels</span></button>
+        <button class="tab-btn" data-tab="cars"><span class="flex items-center gap-1.5"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Cars</span></button>
+      </div>
+
+      <form id="form-flights" class="tab-form grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div class="md:col-span-1"><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">From</label><input class="search-input" type="text" placeholder="City or airport code" id="f-from" value="New York"/></div>
+        <div class="md:col-span-1"><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">To</label><input class="search-input" type="text" placeholder="City or airport code" id="f-to" value="Los Angeles"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Date</label><input class="search-input" type="date" id="f-date"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Passengers</label><select class="search-input" id="f-passengers"><option value="1">1 Passenger</option><option value="2">2 Passengers</option><option value="3">3 Passengers</option><option value="4">4+ Passengers</option></select></div>
+        <div class="flex items-end"><button type="submit" class="btn-primary w-full flex items-center justify-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</button></div>
+      </form>
+
+      <form id="form-hotels" class="tab-form hidden grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div class="md:col-span-2"><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Destination</label><input class="search-input" type="text" placeholder="City or hotel name" id="h-city" value="Paris"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Check-in</label><input class="search-input" type="date" id="h-checkin"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Check-out</label><input class="search-input" type="date" id="h-checkout"/></div>
+        <div class="flex items-end"><button type="submit" class="btn-primary w-full flex items-center justify-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</button></div>
+      </form>
+
+      <form id="form-cars" class="tab-form hidden grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Pick-up Location</label><input class="search-input" type="text" placeholder="City or airport" id="c-location" value="Miami"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Pick-up Date</label><input class="search-input" type="date" id="c-pickup"/></div>
+        <div><label class="block text-xs font-semibold text-ink/60 dark:text-dink/60 mb-1.5 uppercase tracking-wide">Drop-off Date</label><input class="search-input" type="date" id="c-dropoff"/></div>
+        <div class="flex items-end"><button type="submit" class="btn-primary w-full flex items-center justify-center gap-2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</button></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- AD SLOT: LEADERBOARD (between hero and results) -->
+<div class="max-w-4xl mx-auto px-4 pt-6">
+  <div id="ad-leaderboard" class="ad-slot">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-40 mb-1"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <span>Ad Space · 728x90 Leaderboard</span>
+    <span class="text-[.6rem] opacity-60 mt-0.5">Configure ADSENSE_PUB_ID in .env to show ads here</span>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<section id="results-section" class="max-w-4xl mx-auto px-4 py-8 hidden">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h2 class="text-lg font-bold text-ink dark:text-dink" id="results-title">Search Results</h2>
+        <span id="data-source-badge" class="hidden"><span class="w-1.5 h-1.5 rounded-full bg-current"></span> <span id="data-source-text">Mock</span></span>
+      </div>
+      <p class="text-sm text-ink/50 dark:text-dink/50" id="results-count"></p>
+    </div>
+    <div class="flex gap-2">
+      <button class="sort-btn active" data-sort="price">Price ↑</button>
+      <button class="sort-btn" data-sort="rating">Rating</button>
+    </div>
+  </div>
+  <div id="results-grid" class="grid grid-cols-1 gap-4"></div>
+
+  <!-- AD SLOT: MID-RESULTS -->
+  <div class="mt-6">
+    <div id="ad-mid-results" class="ad-slot">
+      <span>Ad Space · 728x90 In-feed</span>
+      <span class="text-[.6rem] opacity-60 mt-0.5">Revenue opportunity for high-traffic pages</span>
+    </div>
+  </div>
+</section>
+
+<!-- DEALS -->
+<section id="deals" class="max-w-4xl mx-auto px-4 py-12">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-ink dark:text-dink">Today's Best Deals</h2>
+      <p class="text-ink/60 dark:text-dink/60 text-sm mt-1">Hand-picked discounts — click to earn affiliate commission</p>
+    </div>
+    <span class="badge badge-green">LIVE</span>
+  </div>
+  <div id="deals-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+</section>
+
+<!-- TRUST BAR -->
+<section class="max-w-4xl mx-auto px-4 pb-8">
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <div class="trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Secure booking</div>
+    <div class="trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Price guarantee</div>
+    <div class="trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Real-time data</div>
+    <div class="trust-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>400+ airlines</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="bg-surface dark:bg-dsurface border-y border-black/5 dark:border-white/5 py-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-ink dark:text-dink text-center mb-10">How SwiftBook Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mx-auto mb-4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+        <h3 class="font-bold text-ink dark:text-dink mb-2">1. Search</h3>
+        <p class="text-sm text-ink/60 dark:text-dink/60">Enter your destination, dates, and preferences. We query real providers and compare prices.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mx-auto mb-4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+        <h3 class="font-bold text-ink dark:text-dink mb-2">2. Compare</h3>
+        <p class="text-sm text-ink/60 dark:text-dink/60">Real-time prices from Aviasales, Booking.com, and partner networks. Sort by price or rating.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary-dark/20 flex items-center justify-center mx-auto mb-4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#01696f" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3 class="font-bold text-ink dark:text-dink mb-2">3. Book</h3>
+        <p class="text-sm text-ink/60 dark:text-dink/60">Click "Book" to go directly to the provider's site. You get the best price, we earn a small commission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AD SLOT: FOOTER BANNER -->
+<div class="max-w-4xl mx-auto px-4 py-6">
+  <div id="ad-footer-banner" class="ad-slot">
+    <span>Ad Space · 728x90 Footer Banner</span>
+    <span class="text-[.6rem] opacity-60 mt-0.5">High-visibility placement after "How it Works"</span>
+  </div>
+</div>
+
+<!-- REVENUE DASHBOARD (Admin only — hidden by default, toggle from nav) -->
+<section id="admin" class="max-w-4xl mx-auto px-4 py-12">
+  <div class="card p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-ink dark:text-dink">Revenue Dashboard</h2>
+        <p class="text-sm text-ink/50 dark:text-dink/50 mt-1">Track your affiliate clicks and estimated earnings</p>
+      </div>
+      <button onclick="loadAnalytics()" class="btn-primary text-sm px-4 py-2">Refresh</button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="revenue-stat">
+        <span class="text-xs text-ink/50 dark:text-dink/50 font-semibold uppercase tracking-wide">Total Clicks</span>
+        <span class="text-2xl font-800 text-ink dark:text-dink mt-1" id="stat-total">—</span>
+      </div>
+      <div class="revenue-stat">
+        <span class="text-xs text-ink/50 dark:text-dink/50 font-semibold uppercase tracking-wide">Flights</span>
+        <span class="text-2xl font-800 text-primary dark:text-primary-dark mt-1" id="stat-flights">—</span>
+      </div>
+      <div class="revenue-stat">
+        <span class="text-xs text-ink/50 dark:text-dink/50 font-semibold uppercase tracking-wide">Hotels</span>
+        <span class="text-2xl font-800 text-primary dark:text-primary-dark mt-1" id="stat-hotels">—</span>
+      </div>
+      <div class="revenue-stat">
+        <span class="text-xs text-ink/50 dark:text-dink/50 font-semibold uppercase tracking-wide">Cars</span>
+        <span class="text-2xl font-800 text-primary dark:text-primary-dark mt-1" id="stat-cars">—</span>
+      </div>
+    </div>
+
+    <div class="bg-surface-offset dark:bg-dsurface-offset rounded-xl p-4 mb-4">
+      <h3 class="text-sm font-bold text-ink dark:text-dink mb-3">Commission Rates</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="text-ink/70 dark:text-dink/70">Flights: <strong>1-1.5%</strong> of ticket price</span></div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="text-ink/70 dark:text-dink/70">Hotels: <strong>4-5%</strong> of booking value</span></div>
+        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="text-ink/70 dark:text-dink/70">Cars: <strong>5-8%</strong> of rental value</span></div>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-bold text-ink dark:text-dink mb-3">Recent Clicks</h3>
+      <div id="recent-clicks" class="space-y-2 text-sm text-ink/60 dark:text-dink/60">
+        <p>No clicks tracked yet. Start searching and clicking "Book" to track affiliate activity.</p>
+      </div>
+    </div>
+
+    <div class="mt-6 p-4 rounded-xl border border-dashed border-primary/30 bg-primary/5">
+      <h3 class="text-sm font-bold text-primary dark:text-primary-dark mb-2">Setup Checklist</h3>
+      <div class="space-y-2 text-sm" id="setup-checklist">
+        <div class="flex items-center gap-2"><span id="check-api" class="w-5 h-5 rounded-full border-2 border-ink/20 dark:border-dink/20 flex items-center justify-center text-xs">?</span> Travelpayouts API Token</div>
+        <div class="flex items-center gap-2"><span id="check-marker" class="w-5 h-5 rounded-full border-2 border-ink/20 dark:border-dink/20 flex items-center justify-center text-xs">?</span> Affiliate Marker (earning commissions)</div>
+        <div class="flex items-center gap-2"><span id="check-ads" class="w-5 h-5 rounded-full border-2 border-ink/20 dark:border-dink/20 flex items-center justify-center text-xs">?</span> Google AdSense (optional)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-10 px-4">
+  <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="14" fill="#01696f"/><path d="M8 14 L13 9 L20 14 L13 19 Z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 9 L13 19" stroke="#fff" stroke-width="1.8"/><circle cx="13" cy="14" r="1.5" fill="#fff"/></svg>
+      <span class="font-bold text-ink dark:text-dink font-body">SwiftBook</span>
+    </div>
+    <p class="text-sm text-ink/50 dark:text-dink/50">&copy; 2026 SwiftBook. Powered by Travelpayouts.</p>
+    <div class="flex gap-4 text-sm text-ink/50 dark:text-dink/50">
+      <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+      <a href="#" class="hover:text-primary transition-colors">Terms</a>
+      <a href="/docs" target="_blank" class="hover:text-primary transition-colors">API</a>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+  <div class="bg-ink dark:bg-dink text-white dark:text-ink rounded-xl px-4 py-3 shadow-2xl text-sm font-semibold flex items-center gap-2 fade-up"><span id="toast-msg"></span></div>
+</div>
+
+<script>
+// ─── Theme ───────────────────────────────────────────────────────────────────
+(function(){
+  const html=document.documentElement, btn=document.querySelector('[data-theme-toggle]');
+  const sun=document.getElementById('icon-sun'), moon=document.getElementById('icon-moon');
+  let theme=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  html.setAttribute('data-theme',theme); updateIcon();
+  btn.addEventListener('click',()=>{ theme=theme==='dark'?'light':'dark'; html.setAttribute('data-theme',theme); updateIcon(); });
+  function updateIcon(){ if(theme==='dark'){sun.classList.add('hidden');moon.classList.remove('hidden')} else{sun.classList.remove('hidden');moon.classList.add('hidden')} }
+})();
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-form').forEach(f=>f.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById('form-'+btn.dataset.tab).classList.remove('hidden');
+    document.getElementById('results-section').classList.add('hidden');
+    currentTab=btn.dataset.tab;
+  });
+});
+let currentTab='flights';
+
+// ─── Dates ───────────────────────────────────────────────────────────────────
+(function(){
+  const today=new Date(), fmt=d=>d.toISOString().split('T')[0];
+  const t1=new Date(today); t1.setDate(t1.getDate()+7);
+  const t2=new Date(today); t2.setDate(t2.getDate()+14);
+  document.getElementById('f-date').value=fmt(t1);
+  document.getElementById('h-checkin').value=fmt(t1);
+  document.getElementById('h-checkout').value=fmt(t2);
+  document.getElementById('c-pickup').value=fmt(t1);
+  document.getElementById('c-dropoff').value=fmt(t2);
+})();
+
+// ─── Toast ───────────────────────────────────────────────────────────────────
+function toast(msg){ const el=document.getElementById('toast'); document.getElementById('toast-msg').textContent=msg; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),3000); }
+
+const API=window.location.origin;
+let allResults=[], sortBy='price';
+
+// ─── Health check ────────────────────────────────────────────────────────────
+(async function(){
+  try{
+    const res=await fetch(API+'/api/health'); const data=await res.json();
+    const el=document.getElementById('api-status-text');
+    if(data.data_source==='travelpayouts') el.textContent='Live prices · Travelpayouts API'+(data.affiliate_active?' · Earning commissions':'');
+    else el.textContent='Demo mode · Add API keys for live data';
+  }catch{ document.getElementById('api-status-text').textContent='Offline · Start the backend server'; }
+})();
+
+// ─── Sort ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.sort-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); sortBy=btn.dataset.sort; renderResults(allResults);
+  });
+});
+
+// ─── Affiliate click tracking ────────────────────────────────────────────────
+function trackClick(type, params, url){
+  fetch(API+'/api/track/click?type='+encodeURIComponent(type)+'&params='+encodeURIComponent(params)+'&url='+encodeURIComponent(url), {method:'POST'}).catch(()=>{});
+}
+
+function openAffiliate(url, type, params){
+  trackClick(type, params, url);
+  if(url && !url.includes('YOUR_MARKER')){
+    window.open(url, '_blank', 'noopener');
+    toast('Opening booking page — commission tracked!');
+  } else {
+    toast('Set TRAVELPAYOUTS_MARKER in .env to enable affiliate links');
+  }
+}
+
+// ─── Forms ───────────────────────────────────────────────────────────────────
+document.getElementById('form-flights').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const from=document.getElementById('f-from').value, to=document.getElementById('f-to').value;
+  const dt=document.getElementById('f-date').value, pax=document.getElementById('f-passengers').value;
+  if(!from||!to){toast('Enter origin and destination');return;}
+  await runSearch(`/api/search/flights?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${dt}&passengers=${pax}`,'flights',`Flights: ${from} → ${to}`);
+});
+
+document.getElementById('form-hotels').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const city=document.getElementById('h-city').value;
+  const ci=document.getElementById('h-checkin').value, co=document.getElementById('h-checkout').value;
+  if(!city){toast('Enter a destination');return;}
+  await runSearch(`/api/search/hotels?city=${encodeURIComponent(city)}&checkIn=${ci}&checkOut=${co}&guests=2`,'hotels',`Hotels in ${city}`);
+});
+
+document.getElementById('form-cars').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const loc=document.getElementById('c-location').value;
+  const pu=document.getElementById('c-pickup').value, dr=document.getElementById('c-dropoff').value;
+  if(!loc){toast('Enter a pick-up location');return;}
+  await runSearch(`/api/search/cars?location=${encodeURIComponent(loc)}&pickUp=${pu}&dropOff=${dr}`,'cars',`Cars in ${loc}`);
+});
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+async function runSearch(url, type, title){
+  const section=document.getElementById('results-section'), grid=document.getElementById('results-grid');
+  section.classList.remove('hidden');
+  document.getElementById('results-title').textContent=title;
+  document.getElementById('results-count').textContent='Searching...';
+  grid.innerHTML=skeletons(4);
+  section.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('data-source-badge').classList.add('hidden');
+
+  try{
+    const res=await fetch(API+url);
+    if(!res.ok) throw new Error('Server error '+res.status);
+    const data=await res.json();
+    allResults=Array.isArray(data)?data:(data.offers||data.results||[]);
+    if(allResults.length===0){grid.innerHTML=emptyState(type);document.getElementById('results-count').textContent='No results';return;}
+    document.getElementById('results-count').textContent=`${allResults.length} result${allResults.length!==1?'s':''} found`;
+
+    const srcBadge=document.getElementById('data-source-badge');
+    const srcText=document.getElementById('data-source-text');
+    const source=allResults[0]?.source||'mock';
+    srcBadge.classList.remove('hidden');
+    srcBadge.className=source==='travelpayouts'?'source-live':'source-mock';
+    srcText.textContent=source==='travelpayouts'?'Live Data':'Demo Data';
+
+    renderResults(allResults,type);
+  }catch(err){
+    grid.innerHTML=`<div class="card p-8 text-center col-span-full"><div class="text-4xl mb-3 opacity-50">⚠</div><p class="font-semibold text-ink dark:text-dink mb-1">Could not connect to backend</p><p class="text-ink/50 dark:text-dink/50 text-sm">Make sure the server is running on port 8000.</p><p class="text-xs text-ink/30 dark:text-dink/30 mt-2 font-mono">${err.message}</p></div>`;
+    document.getElementById('results-count').textContent='Connection error';
+  }
+}
+
+function renderResults(data,type){
+  const sorted=[...data].sort((a,b)=>{ if(sortBy==='price') return (a.price||0)-(b.price||0); return (b.rating||0)-(a.rating||0); });
+  const tab=type||currentTab;
+  document.getElementById('results-grid').innerHTML=sorted.map((item,idx)=>{
+    if(tab==='flights') return flightCard(item,idx);
+    if(tab==='hotels') return hotelCard(item,idx);
+    return carCard(item,idx);
+  }).join('');
+}
+
+// ─── Cards ───────────────────────────────────────────────────────────────────
+function flightCard(f,idx){
+  const stops=f.stops===0?'<span class="badge badge-teal">NONSTOP</span>':`<span class="badge badge-gold">${f.stops} STOP${f.stops>1?'S':''}</span>`;
+  const d=`style="animation-delay:${idx*60}ms"`;
+  const affUrl=f.affiliate_url||'#';
+  const params=`${f.from}-${f.to}`;
+  return `<div class="card p-5 fade-up" ${d}>
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span class="text-sm font-bold text-ink dark:text-dink">${f.airline||'Airline'}</span>
+          <span class="text-xs text-ink/40 dark:text-dink/40 font-mono">${f.code||''}</span>
+          ${stops}
+          ${f.badge?badgeClass(f.badge):''}
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="text-center"><p class="text-xl font-800 text-ink dark:text-dink font-body leading-tight">${f.departure||'--:--'}</p><p class="text-xs text-ink/50 dark:text-dink/50 mt-0.5">${(f.from||'').split(',')[0]}</p></div>
+          <div class="flight-line"></div>
+          <div class="text-center text-xs text-ink/40 dark:text-dink/40 whitespace-nowrap">${f.duration||''}</div>
+          <div class="flight-line"></div>
+          <div class="text-center"><p class="text-xl font-800 text-ink dark:text-dink font-body leading-tight">${f.arrival||'--:--'}</p><p class="text-xs text-ink/50 dark:text-dink/50 mt-0.5">${(f.to||'').split(',')[0]}</p></div>
+        </div>
+      </div>
+      <div class="text-right shrink-0">
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-0.5">from</p>
+        <p class="price-tag">$${f.price}</p>
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-3">per person</p>
+        <a href="${affUrl}" target="_blank" rel="noopener" onclick="openAffiliate('${affUrl}','flight','${params}');return false;" class="btn-book">Book <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></a>
+      </div>
+    </div>
+    ${f.discount_pct?`<div class="mt-3 pt-3 border-t border-black/5 dark:border-white/5"><span class="badge badge-green">🏷 ${f.discount_pct}% OFF</span></div>`:''}
+  </div>`;
+}
+
+function hotelCard(h,idx){
+  const stars=h.rating?'★'.repeat(Math.round(h.rating)):'';
+  const d=`style="animation-delay:${idx*60}ms"`;
+  const affUrl=h.affiliate_url||'#';
+  const params=`${h.name}`;
+  return `<div class="card p-5 fade-up" ${d}>
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1 flex-wrap"><h3 class="font-bold text-ink dark:text-dink">${h.name||'Hotel'}</h3>${h.badge?badgeClass(h.badge):''}</div>
+        <p class="text-sm text-ink/50 dark:text-dink/50 mb-2">📍 ${h.area||h.city||''}</p>
+        <div class="flex items-center gap-1.5">
+          ${stars?`<span class="star text-sm">${stars}</span>`:''}
+          ${h.rating?`<span class="text-sm font-semibold text-ink dark:text-dink">${h.rating}</span>`:''}
+          ${h.reviews?`<span class="text-xs text-ink/40 dark:text-dink/40">(${h.reviews.toLocaleString()} reviews)</span>`:''}
+        </div>
+        ${h.amenities&&h.amenities.length?`<p class="text-xs text-ink/40 dark:text-dink/40 mt-1.5">${h.amenities.join(' · ')}</p>`:''}
+      </div>
+      <div class="text-right shrink-0">
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-0.5">from</p>
+        <p class="price-tag">$${h.price||h.pricePerNight}</p>
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-3">/night</p>
+        <a href="${affUrl}" target="_blank" rel="noopener" onclick="openAffiliate('${affUrl}','hotel','${params}');return false;" class="btn-book">Book <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></a>
+      </div>
+    </div>
+    ${h.discount_pct?`<div class="mt-3 pt-3 border-t border-black/5 dark:border-white/5"><span class="badge badge-green">🏷 ${h.discount_pct}% OFF</span></div>`:''}
+  </div>`;
+}
+
+function carCard(c,idx){
+  const d=`style="animation-delay:${idx*60}ms"`;
+  const affUrl=c.affiliate_url||'#';
+  const params=`${c.name}`;
+  const extras=[];
+  if(c.unlimited_miles) extras.push('Unlimited miles');
+  if(c.free_cancellation) extras.push('Free cancellation');
+  return `<div class="card p-5 fade-up" ${d}>
+    <div class="flex items-start justify-between gap-4">
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1 flex-wrap"><h3 class="font-bold text-ink dark:text-dink">${c.name||'Vehicle'}</h3>${c.badge?badgeClass(c.badge):''}</div>
+        <p class="text-sm text-ink/50 dark:text-dink/50">${c.category||''} · ${c.transmission||'Automatic'} · ${c.seats||5} seats</p>
+        <p class="text-xs text-ink/40 dark:text-dink/40 mt-1">via ${c.provider||'Partner'}</p>
+        ${extras.length?`<div class="flex gap-2 mt-2">${extras.map(e=>`<span class="text-xs text-primary dark:text-primary-dark font-semibold">✓ ${e}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="text-right shrink-0">
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-0.5">from</p>
+        <p class="price-tag">$${c.price}</p>
+        <p class="text-xs text-ink/40 dark:text-dink/40 mb-3">/day</p>
+        <a href="${affUrl}" target="_blank" rel="noopener" onclick="openAffiliate('${affUrl}','car','${params}');return false;" class="btn-book">Book <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></a>
+      </div>
+    </div>
+    ${c.discount_pct?`<div class="mt-3 pt-3 border-t border-black/5 dark:border-white/5"><span class="badge badge-green">🏷 ${c.discount_pct}% OFF</span></div>`:''}
+  </div>`;
+}
+
+function badgeClass(text){
+  const t=text.toLowerCase();
+  if(t.includes('best')||t.includes('value')) return `<span class="badge badge-green">${text}</span>`;
+  if(t.includes('popular')) return `<span class="badge badge-teal">${text}</span>`;
+  if(t.includes('deal')||t.includes('save')||t.includes('drop')) return `<span class="badge badge-gold">${text}</span>`;
+  if(t.includes('nonstop')) return `<span class="badge badge-teal">${text}</span>`;
+  return `<span class="badge badge-blue">${text}</span>`;
+}
+
+function skeletons(n){ return Array.from({length:n},(_,i)=>`<div class="card p-5" style="animation-delay:${i*80}ms"><div class="skeleton h-4 w-1/3 mb-3"></div><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-4 w-1/2"></div></div>`).join(''); }
+
+function emptyState(type){
+  const msgs={flights:'No flights found for this route.',hotels:'No hotels found in this city.',cars:'No cars available at this location.'};
+  return `<div class="card p-12 text-center col-span-full"><div class="text-4xl mb-4 opacity-50">🔍</div><h3 class="font-bold text-ink dark:text-dink mb-2">No results found</h3><p class="text-sm text-ink/50 dark:text-dink/50">${msgs[type]||'Try adjusting your search.'}</p></div>`;
+}
+
+// ─── Deals ───────────────────────────────────────────────────────────────────
+async function loadDeals(){
+  const grid=document.getElementById('deals-grid');
+  try{
+    const res=await fetch(API+'/api/deals'); const data=await res.json();
+    const deals=Array.isArray(data)?data:(data.deals||[]);
+    if(deals.length===0) throw new Error('empty');
+    grid.innerHTML=deals.slice(0,3).map((d,i)=>dealCard(d,i)).join('');
+  }catch{ grid.innerHTML=fallbackDeals(); }
+}
+
+function dealCard(d,idx){
+  const dl=idx!==undefined?`style="animation-delay:${idx*100}ms"`:'';
+  const affUrl=d.affiliate_url||'#';
+  return `<div class="deal-card fade-up" ${dl}>
+    ${d.discount?`<span class="discount-ribbon">${d.discount}% OFF</span>`:''}
+    <p class="text-xs font-semibold uppercase tracking-widest text-white/60 mb-1">${d.type||'Deal'}</p>
+    <h3 class="text-lg font-bold text-white mb-1 relative z-10">${d.title||d.name}</h3>
+    <p class="text-sm text-white/70 mb-3 relative z-10">${d.description||''}</p>
+    <div class="flex items-end justify-between relative z-10">
+      <div>
+        ${d.original_price?`<p class="text-white/50 text-xs line-through">$${d.original_price}</p>`:''}
+        <p class="text-2xl font-900 text-white">$${d.price}</p>
+      </div>
+      <a href="${affUrl}" target="_blank" rel="noopener" onclick="openAffiliate('${affUrl}','deal','${d.title||''}');return false;" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold rounded-lg transition-all inline-flex items-center gap-1">Grab Deal <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></a>
+    </div>
+  </div>`;
+}
+
+function fallbackDeals(){
+  const deals=[
+    {type:'Flight',title:'NYC → Miami',description:'Weekend · Economy · Nonstop',price:89,original_price:149,discount:40,affiliate_url:'#'},
+    {type:'Hotel',title:'Paris Boutique Hotel',description:'5 nights · Breakfast · 4-star',price:99,original_price:165,discount:40,affiliate_url:'#'},
+    {type:'Car',title:'Compact SUV — Las Vegas',description:'7 days · Unlimited miles',price:31,original_price:52,discount:40,affiliate_url:'#'},
+  ];
+  return deals.map((d,i)=>dealCard(d,i)).join('');
+}
+loadDeals();
+
+// ─── Revenue Dashboard / Analytics ───────────────────────────────────────────
+async function loadAnalytics(){
+  try{
+    const [clickRes, configRes]=await Promise.all([
+      fetch(API+'/api/analytics/clicks'), fetch(API+'/api/config/monetization')
+    ]);
+    const clicks=await clickRes.json();
+    const config=await configRes.json();
+
+    document.getElementById('stat-total').textContent=clicks.total_clicks||0;
+    const byType=clicks.by_type||[];
+    document.getElementById('stat-flights').textContent=byType.find(b=>b.type==='flight')?.count||0;
+    document.getElementById('stat-hotels').textContent=byType.find(b=>b.type==='hotel')?.count||0;
+    document.getElementById('stat-cars').textContent=byType.find(b=>b.type==='car')?.count||0;
+
+    // Recent clicks
+    const recentEl=document.getElementById('recent-clicks');
+    if(clicks.recent&&clicks.recent.length>0){
+      recentEl.innerHTML=clicks.recent.slice(0,5).map(c=>{
+        const d=new Date(c.timestamp*1000);
+        return `<div class="flex items-center gap-2 py-1.5 border-b border-black/5 dark:border-white/5"><span class="badge badge-teal text-[.65rem]">${c.type}</span><span class="flex-1 truncate">${c.params}</span><span class="text-xs opacity-50">${d.toLocaleTimeString()}</span></div>`;
+      }).join('');
+    }
+
+    // Setup checklist
+    const checkMark='<span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</span>';
+    const crossMark='<span class="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center text-xs font-bold">✗</span>';
+    const rs=config.revenue_streams||{};
+    document.getElementById('check-api').outerHTML=rs.flights?.active?checkMark:crossMark;
+    document.getElementById('check-marker').outerHTML=config.affiliate_active?checkMark:crossMark;
+    document.getElementById('check-ads').outerHTML=config.adsense_active?checkMark:crossMark;
+
+    // Activate AdSense slots if configured
+    if(config.adsense_pub_id){
+      document.querySelectorAll('.ad-slot').forEach(slot=>{
+        slot.innerHTML=`<ins class="adsbygoogle" style="display:block" data-ad-client="${config.adsense_pub_id}" data-ad-format="auto"></ins>`;
+        slot.classList.add('ad-slot-active');
+      });
+    }
+  }catch(e){
+    console.log('Analytics not available:',e);
+  }
+}
+loadAnalytics();
+</script>
+</body>
+</html>
